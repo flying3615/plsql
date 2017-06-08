@@ -170,16 +170,17 @@ END;
 
 
 
---- A trigger for first attendent 
-CREATE or REPLACE TRIGGER active_membership_when_first_attend 
+--- A trigger for activate membership when first attendence
+CREATE or REPLACE TRIGGER activate_membership
 AFTER 
-INSERT ON attendance  FOR EACH ROW
+INSERT ON attendance FOR EACH ROW
+DECLARE
+activatedate DATE;
 Begin 
---1.select from insert member id in attendence
---2.check if member ship mactivate is null
-select msactivatedate from membership where member_id=:new.member_id and msactivatedate is null;
---3.if null, update membership table's mactivatedate as the day they attendence' 
-update membership set msactivatedate=sysdate;
+select msactivatedate into activatedate from member_ship where member_id = :NEW.member_id and msactivatedate is null;
+--If null, update membership table's mactivatedate as the day they attendence' 
+SYS.DBMS_OUTPUT.PUT_LINE('update users membership activated @'||sysdate);
+update member_ship set msactivatedate=sysdate;
 EXCEPTION
       WHEN NO_DATA_FOUND THEN
         SYS.DBMS_OUTPUT.PUT_LINE('users membership has been activated');
