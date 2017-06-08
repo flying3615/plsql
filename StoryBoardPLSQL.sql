@@ -150,19 +150,23 @@ IS
                     END IF;               
                 END IF;
 
-               
-                DBMS_OUTPUT.PUT_LINE('calculate pay amount');
+
                 IF is_student THEN
                     fee := 15*discount;
                 ELSE 
                     fee := 20*discount;
                 END IF;
+
+                DBMS_OUTPUT.PUT_LINE('calculate pay amount='||fee);
                 --insert membership table
                 select member_ship_seq.nextval into ms_next_id from dual;
                 --leave activate date as null, waiting for customer's first visit'
+                DBMS_OUTPUT.PUT_LINE('insert member_ship values '||ms_next_id||','||SYSTIMESTAMP||','||weeks||','||fee||','||discount||','||member_id_tmp );
+
                 insert into member_ship values (ms_next_id,SYSTIMESTAMP,weeks,fee,discount,member_id_tmp,null);
                 --insert payment table
                 select payment_seq.nextval into p_next_id from dual;
+                DBMS_OUTPUT.PUT_LINE('insert payment values '||p_next_id||','||SYSTIMESTAMP||','||pay_type||','||fee||','||member_id_tmp);                
                 insert into payment values (p_next_id,SYSTIMESTAMP,pay_type,fee,member_id_tmp);
         END IF;
         -- after payment, freeze the membership until first attendent record inserted
