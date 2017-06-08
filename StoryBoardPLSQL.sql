@@ -168,19 +168,21 @@ IS
     END buy_membership;
 END;
 
+
+
 --- A trigger for first attendent 
-
-
-CREATE or REPLACE TRIGGER Before_Update_Stat_product 
+CREATE or REPLACE TRIGGER active_membership_when_first_attend 
 AFTER 
-INSERT ON attendance 
+INSERT ON attendance  FOR EACH ROW
 Begin 
-
-
-
-INSERT INTO product_check 
-Values('Before update, statement level',sysdate); 
+--1.select from insert member id in attendence
+--2.check if member ship mactivate is null
+select msactivatedate from membership where member_id=:new.member_id and msactivatedate is null;
+--3.if null, update membership table's mactivatedate as the day they attendence' 
+update membership set msactivatedate=sysdate;
+EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        SYS.DBMS_OUTPUT.PUT_LINE('users membership has been activated');
 END;
-
 
 SET SERVEROUTPUT OFF;
