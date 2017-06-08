@@ -171,4 +171,16 @@ END;
 --- A trigger for first attendent 
 
 
+CREATE or REPLACE TRIGGER Before_Update_Stat_product 
+AFTER 
+INSERT ON attendance 
+Begin 
+
+
+
+INSERT INTO product_check 
+Values('Before update, statement level',sysdate); 
+END;
+
+
 SET SERVEROUTPUT OFF;
