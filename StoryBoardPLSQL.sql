@@ -6,11 +6,11 @@ IS
         passwordIn IN member.mpassword%TYPE
         );
 
-   FUNCTION incomeAt(
+    FUNCTION incomeAt(
             year_in IN NUMBER,
             month_in IN NUMBER) RETURN NUMBER;
 
-    PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2);
+    PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2, is_student BOOLEAN);
 
 END;
 /
@@ -81,7 +81,7 @@ IS
     END incomeAt;
 
     ---payment membership renew
-    PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2)
+    PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2, is_student BOOLEAN)
     IS
     member_id_tmp NUMBER;
     ms_next_id NUMBER;
