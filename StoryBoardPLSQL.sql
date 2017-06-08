@@ -1,27 +1,22 @@
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PACKAGE emp_admin
 IS
-    PROCEDURE login（
+    PROCEDURE login(
         usernameIn IN member.musername%TYPE,
         passwordIn IN member.mpassword%TYPE
         );
 
-    FUNCTION incomeAt(
-            year IN NUMBER,
-            month IN NUMBER
-        ) RETURN NUMBER;
+   FUNCTION incomeAt(
+            year_in IN NUMBER,
+            month_in IN NUMBER) RETURN NUMBER;
 
-    PROCEDURE buy_membership（
-        usernameIn IN member.musername%TYPE,
-        amount IN NUMBER(5,2),
-        pay_type IN VARCHAR2
-        );
+    PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2);
 
 END;
 /
 
 
-create or replace PACKAGE BODY emp_admin
+CREATE OR REPLACE PACKAGE BODY emp_admin
 IS
 
     ---LOGIN FUNCTION
@@ -73,8 +68,8 @@ IS
         END IF;
         SYS.DBMS_OUTPUT.PUT_LINE('Find incomes in '||month_tmp||'/'||year_tmp);
         select sum(p.pamount) into income from payment p where extract(YEAR from p.pdate) = year_tmp AND extract(MONTH from p.pdate) = month_tmp;
-        IF income = null THEN
-            RAISE e_my_exception;
+        IF income IS NULL THEN
+            RAISE e_no_income_exception;
         END IF;
         RETURN income;
         EXCEPTION
@@ -86,15 +81,14 @@ IS
     END incomeAt;
 
     ---payment membership renew
-    PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2,is_student BOOLEAN)
+    PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2)
     IS
     member_id_tmp NUMBER;
     days_between NUMBER;
     att_times NUMBER;
     attendence_rate NUMBER;
-    discount NUMBER := 1;
+    discount NUMBER;
     activatedate DATE;
-    fee NUMBER;
     CURSOR c_id IS
         SELECT id
         FROM member
@@ -115,8 +109,10 @@ IS
                 FETCH c_activate INTO activatedate;
                 IF c_activate%NOTFOUND THEN
                      DBMS_OUTPUT.PUT_LINE('New USER, No discount');
+
                 ELSE
                     --check if there is an exsiting membership which hasn't been activated
+                    DBMS_OUTPUT.PUT_LINE('OLD activatedate'||activatedate);   
                     IF activatedate IS NULL THEN
                         DBMS_OUTPUT.PUT_LINE('OLD USER,but there is an exsiting membership which hasnt been activated for user '||usernameIn);
                         RETURN;
@@ -154,20 +150,13 @@ IS
                
                 DBMS_OUTPUT.PUT_LINE('calculate pay amount');
                 
-                --student base is $15, adult is $20
-                IF is_student THEN
-                    fee := 15*discount;
-                ELSE 
-                    fee := 20*discount;
-                END IF;
-                
                 --insert payment table
 
         END IF;
         -- after payment, freeze the membership until first attendent record inserted
     END buy_membership;
 END;
-
+/
 
 
 --- A trigger for activate membership when first attendence
@@ -185,5 +174,5 @@ EXCEPTION
       WHEN NO_DATA_FOUND THEN
         SYS.DBMS_OUTPUT.PUT_LINE('users membership has been activated');
 END;
-
+/
 SET SERVEROUTPUT OFF;
