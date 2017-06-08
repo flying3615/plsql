@@ -84,11 +84,14 @@ IS
     PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2)
     IS
     member_id_tmp NUMBER;
+    ms_next_id NUMBER;
+    p_next_id NUMBER;
     days_between NUMBER;
     att_times NUMBER;
     attendence_rate NUMBER;
     discount NUMBER;
     activatedate DATE;
+    fee NUMBER;
     CURSOR c_id IS
         SELECT id
         FROM member
@@ -149,9 +152,18 @@ IS
 
                
                 DBMS_OUTPUT.PUT_LINE('calculate pay amount');
-                
+                IF is_student THEN
+                    fee := 15*discount;
+                ELSE 
+                    fee := 20*discount;
+                END IF;
+                --insert membership table
+                select member_ship_seq.nextval into ms_next_id from dual;
+                --leave activate date as null, waiting for customer's first visit'
+                insert into member_ship values (ms_next_id,SYSTIMESTAMP,weeks,fee,discount,member_id_tmp,null);
                 --insert payment table
-
+                select payment_seq.nextval into p_next_id from dual;
+                insert into payment values (p_next_id,SYSTIMESTAMP,pay_type,fee,member_id_tmp);
         END IF;
         -- after payment, freeze the membership until first attendent record inserted
     END buy_membership;
