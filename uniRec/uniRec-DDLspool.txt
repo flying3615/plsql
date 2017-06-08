@@ -1,0 +1,158 @@
+CREATE Table article_group
+
+Table ARTICLE_GROUP created.
+
+
+Sequence ARTICLE_GROUP_SEQ created.
+
+
+Trigger ARTICLE_GROUP_SEQ_TR compiled
+
+CREATE Table article
+
+Table ARTICLE created.
+
+
+Index FK_ARTICLE_GROUP_ID created.
+
+
+Sequence ARTICLE_SEQ created.
+
+
+Trigger ARTICLE_SEQ_TR compiled
+
+CREATE Table facilities
+
+Table FACILITIES created.
+
+
+Sequence FACILITIES_SEQ created.
+
+
+Trigger FACILITIES_SEQ_TR compiled
+
+CREATE Table group_course
+
+Table GROUP_COURSE created.
+
+
+Sequence GROUP_COURSE_SEQ created.
+
+
+Trigger GROUP_COURSE_SEQ_TR compiled
+
+CREATE Table trainer
+
+Table TRAINER created.
+
+
+Sequence TRAINER_SEQ created.
+
+
+Trigger TRAINER_SEQ_TR compiled
+
+CREATE Table group_course_trainer
+
+Table GROUP_COURSE_TRAINER created.
+
+
+Index FK_GCT_TRAINERS_ID created.
+
+CREATE Table member
+
+Table MEMBER created.
+
+
+Sequence MEMBER_SEQ created.
+
+
+Trigger MEMBER_SEQ_TR compiled
+
+CREATE Table credit_card
+
+Table CREDIT_CARD created.
+
+
+Index FK_CREDIT_CARD_MEMBER_ID created.
+
+
+Sequence CREDIT_CARD_SEQ created.
+
+
+Trigger CREDIT_CARD_SEQ_TR compiled
+
+CREATE Table member_booking
+
+Table MEMBER_BOOKING created.
+
+
+Sequence MEMBER_BOOKING_SEQ created.
+
+
+Trigger MEMBER_BOOKING_SEQ_TR compiled
+
+
+Index FK_MEMBER_BOOKING_MEMBER_ID created.
+
+
+Index FK_MEMBER_BOOKING_FACILITY_ID created.
+
+
+Index FK_MEMBER_BOOKING_COURSE_ID created.
+
+CREATE Table member_ship
+
+Table MEMBER_SHIP created.
+
+
+Sequence MEMBER_SHIP_SEQ created.
+
+
+Trigger MEMBER_SHIP_SEQ_TR compiled
+
+
+Index FK_MEMBER_SHIP_MEMBER_ID created.
+
+CREATE Table payment
+
+Table PAYMENT created.
+
+
+Sequence PAYMENT_SEQ created.
+
+
+Trigger PAYMENT_SEQ_TR compiled
+
+
+Index FK_PAYMENT_MEMBERSHIP_ID created.
+
+CREATE Table timetable
+
+Table TIMETABLE created.
+
+
+Sequence TIMETABLE_SEQ created.
+
+
+Trigger TIMETABLE_SEQ_TR compiled
+
+
+Index FK_TIMETABLE_FACILITY_ID created.
+
+
+Index FK_TIMETABLE_COURSE_ID created.
+
+CREATE Table attendance
+
+Table ATTENDANCE created.
+
+
+Index FK_ATTENDANCE_MEMBER_ID created.
+
+
+Sequence ATTENDANCE_SEQ created.
+
+
+Trigger ATTENDANCE_SEQ_TR compiled
+
+Turning OFF the Spool

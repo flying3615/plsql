@@ -1,0 +1,109 @@
+Inserting Data into article_group table
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into article table
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into facilities table
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into group_course table
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into trainer table
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into member table
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into credit_card table
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into member_booking table
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into member_ship table
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into payment table
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into timetable table
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+Inserting Data into attendance table
+
+1 row inserted.
+
+Turning OFF the Spool
