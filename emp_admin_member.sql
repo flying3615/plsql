@@ -46,6 +46,7 @@ IS
     PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2, is_student BOOLEAN)
     IS
         member_id_tmp NUMBER;
+        ms_tmp_id NUMBER;
         days_between NUMBER;
         att_times NUMBER;
         attendence_rate NUMBER;
@@ -60,7 +61,7 @@ IS
         CURSOR c_activate IS
             SELECT msactivatedate 
             FROM member_ship ms,member m
-            WHERE ms.member_id=m.id and m.musername=usernameIn;
+            WHERE ms.member_id=m.id and m.musername=usernameIn order by msactivatedate desc;
     BEGIN
         OPEN c_id;
         FETCH c_id INTO member_id_tmp;
@@ -74,12 +75,13 @@ IS
                      DBMS_OUTPUT.PUT_LINE('New USER, No discount');
                 ELSE
                     --check if there is an exsiting membership which hasn't been activated
-                    DBMS_OUTPUT.PUT_LINE('OLD activatedate'||activatedate);   
                     IF activatedate IS NULL THEN
                         DBMS_OUTPUT.PUT_LINE('OLD USER,but there is an exsiting membership which hasnt been activated for user '||usernameIn);
                         RETURN;
+                    ELSE
+                        DBMS_OUTPUT.PUT_LINE('last time activatedate @'||activatedate);   
                     END IF;
-                    DBMS_OUTPUT.PUT_LINE('OLD USER');     
+                    
                     --get overall attendence
                     select count(*) into att_times
                     from attendance att,member_ship ms 
@@ -89,22 +91,22 @@ IS
                     --check the attendence
                     attendence_rate := 100*att_times/days_between;
                     IF attendence_rate < 50 THEN
-                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 50, no discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 50%, no discount...');
                         discount := 1;
                     ELSIF attendence_rate = 50 and attendence_rate < 60 THEN
-                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 60, 10% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 60%, 10% discount...');
                         discount := 0.9;                    
                     ELSIF attendence_rate = 60 and attendence_rate < 70 THEN
-                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 70, 20% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 70%, 20% discount...');
                         discount := 0.8;                    
                     ELSIF attendence_rate = 70 and attendence_rate < 80 THEN
-                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 80, 30% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 80%, 30% discount...');
                         discount := 0.7;                    
                     ELSIF attendence_rate = 80 and attendence_rate < 90 THEN
-                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 90, 40% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 90%, 40% discount...');
                         discount := 0.6;                    
                     ELSIF attendence_rate >= 90 THEN
-                        DBMS_OUTPUT.PUT_LINE('attendence_rate greater than 90, 50% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate greater than 90%, 50% discount...');
                         discount := 0.5;                    
                     END IF;               
                 END IF;
@@ -112,19 +114,22 @@ IS
 
                 IF is_student THEN
                     fee := 15*discount;
+                    DBMS_OUTPUT.PUT_LINE('Student fee based on $15/week');
                 ELSE 
                     fee := 20*discount;
+                    DBMS_OUTPUT.PUT_LINE('Adult fee based on $20/week');                    
                 END IF;
 
                 DBMS_OUTPUT.PUT_LINE('calculate pay amount='||fee);
                 --insert membership table
                 --leave activate date as null, waiting for customer's first visit'
                 DBMS_OUTPUT.PUT_LINE('insert member_ship values '||','||SYSTIMESTAMP||','||weeks||','||fee||','||discount||','||member_id_tmp );
-                insert into member_ship values (member_ship_seq.nextval,SYSTIMESTAMP,weeks,fee,discount,member_id_tmp,null);
+                select member_ship_seq.nextval into ms_tmp_id from dual;
+                insert into member_ship values (ms_tmp_id,SYSTIMESTAMP,weeks,fee,discount,member_id_tmp,null);
 
                 --insert payment table
                 DBMS_OUTPUT.PUT_LINE('insert payment values '||','||SYSTIMESTAMP||','||pay_type||','||fee||','||member_id_tmp);                
-                insert into payment values (payment_seq.nextval,SYSTIMESTAMP,pay_type,fee,member_id_tmp);
+                insert into payment values (payment_seq.nextval,SYSTIMESTAMP,pay_type,fee,ms_tmp_id);
                 CLOSE c_activate;
                 CLOSE c_id;
         END IF;
