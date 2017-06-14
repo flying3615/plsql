@@ -4,7 +4,7 @@ IS
 
     PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2, is_student BOOLEAN);
 
-    PROCEDURE booking_facilities_available(facility_name IN facilities.fname%TYPE, bookTime IN member_booking.mbtime%TYPE, duration IN NUMBER, usernameIn IN member.musername%TYPE);
+    PROCEDURE booking_facilities_available(facility_name IN facilities.fname%TYPE, bookTime IN VARCHAR2, duration IN NUMBER, usernameIn IN member.musername%TYPE);
 
 END;
 /
@@ -12,21 +12,30 @@ END;
 
 CREATE OR REPLACE PACKAGE BODY emp_admin_member
 IS
-    FUNCTION checkBookable(hasBookedStartTime IN VARCHAR2,hasBookedEndTime IN VARCHAR2,toBeBookedStartTime IN VARCHAR2,tobeBookedEndTime IN VARCHAR2) 
+    FUNCTION checkBookable(hasBookedStartTime IN TIMESTAMP,hasBookedEndTime IN TIMESTAMP,toBeBookedStartTime IN TIMESTAMP,tobeBookedEndTime IN TIMESTAMP) 
     RETURN BOOLEAN
     IS
     BEGIN
+        DBMS_OUTPUT.PUT_LINE('==================check time=====================');  
+        DBMS_OUTPUT.PUT_LINE('hasBookedStartTime'||hasBookedStartTime);  
+        DBMS_OUTPUT.PUT_LINE('hasBookedEndTime'||hasBookedEndTime);  
+        DBMS_OUTPUT.PUT_LINE('toBeBookedStartTime'||toBeBookedStartTime);  
+        DBMS_OUTPUT.PUT_LINE('tobeBookedEndTime'||tobeBookedEndTime);  
         --(3 kinds of conditions which cannot allow to book)    
         IF toBeBookedStartTime > hasBookedStartTime AND toBeBookedStartTime < hasBookedEndTime THEN
             --1. to-be-booked begintime is in the range of exsiting booking time span            
+            DBMS_OUTPUT.PUT_LINE('TIME is NOK since toBeBookedStartTime is in the range of exsiting booking time span ');            
             RETURN false;
         ELSIF tobeBookedEndTime > hasBookedStartTime AND tobeBookedEndTime < hasBookedEndTime THEN
             --2. to-be-booked endtime is in the range of exsiting booking time span
+            DBMS_OUTPUT.PUT_LINE('TIME is NOK since tobeBookedEndTime is in the range of exsiting booking time span ');            
             RETURN false;
         ELSIF toBeBookedStartTime <= hasBookedStartTime AND tobeBookedEndTime >= hasBookedEndTime THEN
             --3. (to-be-booked begintime is eariler than or equals to exsiting begintime) && (to-be-booked endtime is later than or equals to exsiting endtime)
+            DBMS_OUTPUT.PUT_LINE('TIME is NOK since tobeBooked Time includes an exsiting booking time ');                        
             RETURN false;
         ELSE
+            DBMS_OUTPUT.PUT_LINE('TIME is OK');        
             RETURN true;
         END IF;
     END checkBookable;
@@ -122,18 +131,19 @@ IS
         -- after payment, freeze the membership until first attendent record inserted
     END buy_membership;
 
+    --04-APR-2017 16:53
     --book facility for a memebr
-    PROCEDURE booking_facilities_available(facility_name IN facilities.fname%TYPE, bookTime IN member_booking.mbtime%TYPE, duration IN NUMBER, usernameIn IN member.musername%TYPE)
+    PROCEDURE booking_facilities_available(facility_name IN facilities.fname%TYPE, bookTime IN VARCHAR2, duration IN NUMBER, usernameIn IN member.musername%TYPE)
     IS
-        membership_expired_date DATE;
-        hasBookedStartTime VARCHAR2(20);
-        hasBookedEndTime VARCHAR2(20);
-        toBeBookedStartTime VARCHAR2(20);
-        tobeBookedEndTime VARCHAR2(20);
+        membership_expired_date TIMESTAMP;
+        hasBookedStartTime TIMESTAMP;
+        hasBookedEndTime TIMESTAMP;
+        toBeBookedStartTime TIMESTAMP;
+        tobeBookedEndTime TIMESTAMP;
         f_id facilities.id%TYPE;
         m_id member.id%TYPE;
         CURSOR c_fac_booked_time IS
-            select to_char(mb.mbtime,'DD-MON-YYYY HH24:MI') as startTime,to_char((mb.mbtime+mb.DURATION*1/(24*60)),'DD-MON-YYYY HH24:MI') as endtime 
+            select mb.mbtime as startTime,(mb.mbtime+mb.DURATION*1/(24*60)) as endtime 
             from facilities f, member_booking mb 
             where f.id=mb.facility_id and f.FNAME=facility_name;
     BEGIN
@@ -143,14 +153,18 @@ IS
         select future into membership_expired_date 
         from (select ms.MSDATE+7*ms.MSDURATION as future, ms.MSDURATION from member_ship ms, member mm where ms.member_id=mm.id and mm.musername=usernameIn order by future desc) 
         where rownum = 1;
+
+        toBeBookedStartTime := TO_TIMESTAMP(bookTime,'DD-MON-YYYY HH24:MI');
+        --add minutes
+        tobeBookedEndTime := toBeBookedStartTime+duration*1/(24*60);
+
+       
         --check username if is a memebr or mebership is outdated at the future booking time        
-        IF membership_expired_date < bookTime THEN
-            DBMS_OUTPUT.PUT_LINE('Membership of '||usernameIn||' will be expried before '||bookTime||', cannot book anything');
+        IF membership_expired_date < toBeBookedStartTime THEN
+            DBMS_OUTPUT.PUT_LINE('Membership of '||usernameIn||' will be expried before '||toBeBookedStartTime||', cannot book anything');
             RETURN;
         END IF;
-
-        toBeBookedStartTime := to_char(bookTime,'DD-MON-YYYY HH24:MI');
-        tobeBookedEndTime := to_char((bookTime+duration*1/(24*60)),'DD-MON-YYYY HH24:MI');
+        
 
         OPEN c_fac_booked_time;        
         LOOP
@@ -159,14 +173,15 @@ IS
             --check the facility he'd like to book if is available at his booking time
             IF NOT checkBookable(hasBookedStartTime,hasBookedEndTime,toBeBookedStartTime,tobeBookedEndTime) THEN
                 --if there is an exsiting engaged, book failed and return
-                DBMS_OUTPUT.PUT_LINE('facility_name is not avaliable during  '||toBeBookedStartTime||' to '||tobeBookedEndTime);   
+                DBMS_OUTPUT.PUT_LINE(facility_name||' is not avaliable during  '||toBeBookedStartTime||' to '||tobeBookedEndTime);   
                 RETURN;             
             END IF;
         END LOOP;
         CLOSE c_fac_booked_time;
+       
           --if so, insert booking table
         DBMS_OUTPUT.PUT_LINE(usernameIn||' book '||facility_name||' successfully during '||toBeBookedStartTime||' to '||tobeBookedEndTime);
-        insert into member_booking values(member_booking_seq.nextval,bookTime,usernameIn,m_id,f_id,null,duration);
+        insert into member_booking values(member_booking_seq.nextval,toBeBookedStartTime,usernameIn,m_id,f_id,null,duration);
   
     END booking_facilities_available;
 
