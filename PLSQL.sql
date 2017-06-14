@@ -1,3 +1,4 @@
+
 SET SERVEROUTPUT ON;
 DECLARE
   c_course VARCHAR2(40) := 'ITB7325 Advanced Database';

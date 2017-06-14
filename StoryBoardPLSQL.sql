@@ -18,7 +18,6 @@ END;
 
 CREATE OR REPLACE PACKAGE BODY emp_admin
 IS
-
     ---LOGIN FUNCTION
     PROCEDURE login(
         usernameIn IN member.musername%TYPE,
@@ -45,7 +44,6 @@ IS
         SYS.DBMS_OUTPUT.PUT_LINE('Username: '||usernameIn||' Cannot be fount');
     END login;
 
-
     -----INCOME IN THE GIVEN MONTH
     FUNCTION incomeAt(
             year_in IN NUMBER,
@@ -71,6 +69,7 @@ IS
         IF income IS NULL THEN
             RAISE e_no_income_exception;
         END IF;
+        SYS.DBMS_OUTPUT.PUT_LINE('the amount is '||income);        
         RETURN income;
         EXCEPTION
     WHEN e_no_income_exception THEN
@@ -130,22 +129,22 @@ IS
                     --check the attendence
                     attendence_rate := 100*att_times/days_between;
                     IF attendence_rate < 50 THEN
-                        DBMS_OUTPUT.PUT_LINE('less than 50, no discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 50, no discount...');
                         discount := 1;
                     ELSIF attendence_rate = 50 and attendence_rate < 60 THEN
-                        DBMS_OUTPUT.PUT_LINE('less than 60, 10% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 60, 10% discount...');
                         discount := 0.9;                    
                     ELSIF attendence_rate = 60 and attendence_rate < 70 THEN
-                        DBMS_OUTPUT.PUT_LINE('less than 70, 20% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 70, 20% discount...');
                         discount := 0.8;                    
                     ELSIF attendence_rate = 70 and attendence_rate < 80 THEN
-                        DBMS_OUTPUT.PUT_LINE('less than 80, 30% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 80, 30% discount...');
                         discount := 0.7;                    
                     ELSIF attendence_rate = 80 and attendence_rate < 90 THEN
-                        DBMS_OUTPUT.PUT_LINE('less than 90, 40% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate less than 90, 40% discount...');
                         discount := 0.6;                    
                     ELSIF attendence_rate >= 90 THEN
-                        DBMS_OUTPUT.PUT_LINE('greater than 90, 50% discount...');
+                        DBMS_OUTPUT.PUT_LINE('attendence_rate greater than 90, 50% discount...');
                         discount := 0.5;                    
                     END IF;               
                 END IF;
@@ -182,13 +181,15 @@ INSERT ON attendance FOR EACH ROW
 DECLARE
 activatedate DATE;
 Begin 
-select msactivatedate into activatedate from member_ship where member_id = :NEW.member_id and msactivatedate is null;
 --If null, update membership table's mactivatedate as the day they attendence' 
 SYS.DBMS_OUTPUT.PUT_LINE('update users membership activated @'||sysdate);
-update member_ship set msactivatedate=sysdate;
+update member_ship set msactivatedate=sysdate where member_id = :NEW.member_id and msactivatedate is null;
 EXCEPTION
       WHEN NO_DATA_FOUND THEN
         SYS.DBMS_OUTPUT.PUT_LINE('users membership has been activated');
 END;
 /
 SET SERVEROUTPUT OFF;
+
+
+
