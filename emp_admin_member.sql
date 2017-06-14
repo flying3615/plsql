@@ -1,14 +1,6 @@
 SET SERVEROUTPUT ON;
-CREATE OR REPLACE PACKAGE emp_admin
+CREATE OR REPLACE PACKAGE emp_admin_member
 IS
-    PROCEDURE login(
-        usernameIn IN member.musername%TYPE,
-        passwordIn IN member.mpassword%TYPE
-        );
-
-    FUNCTION incomeAt(
-            year_in IN NUMBER,
-            month_in IN NUMBER) RETURN NUMBER;
 
     PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2, is_student BOOLEAN);
 
@@ -16,69 +8,8 @@ END;
 /
 
 
-CREATE OR REPLACE PACKAGE BODY emp_admin
+CREATE OR REPLACE PACKAGE BODY emp_admin_member
 IS
-    ---LOGIN FUNCTION
-    PROCEDURE login(
-        usernameIn IN member.musername%TYPE,
-        passwordIn IN member.mpassword%TYPE
-        )
-    IS
-        userID member.ID%TYPE;
-        username member.musername%TYPE;
-        password member.mpassword%TYPE;
-    BEGIN
-        SELECT id,musername,mpassword 
-        INTO userID,username,password 
-        FROM member
-        WHERE musername = usernameIn;
-    
-        IF passwordIn = password THEN
-        SYS.DBMS_OUTPUT.PUT_LINE('Login Successfully');                
-        ELSE
-            SYS.DBMS_OUTPUT.PUT_LINE('Username: '||username||' Password mismatch');            
-        END IF;
-        
-    EXCEPTION
-      WHEN NO_DATA_FOUND THEN
-        SYS.DBMS_OUTPUT.PUT_LINE('Username: '||usernameIn||' Cannot be fount');
-    END login;
-
-    -----INCOME IN THE GIVEN MONTH
-    FUNCTION incomeAt(
-            year_in IN NUMBER,
-            month_in IN NUMBER) RETURN NUMBER
-    IS
-        income NUMBER;
-        year_tmp NUMBER;
-        month_tmp NUMBER;
-        e_no_income_exception EXCEPTION;
-    BEGIN
-         --get current year by default
-        year_tmp := EXTRACT(year FROM sysdate);
-        IF year_in != NULL THEN
-            year_tmp := year_in;
-        END IF;
-        -- get current month by default
-        month_tmp := EXTRACT(month FROM sysdate);
-        IF month_in != null THEN
-            month_tmp := month_in;
-        END IF;
-        SYS.DBMS_OUTPUT.PUT_LINE('Find incomes in '||month_tmp||'/'||year_tmp);
-        select sum(p.pamount) into income from payment p where extract(YEAR from p.pdate) = year_tmp AND extract(MONTH from p.pdate) = month_tmp;
-        IF income IS NULL THEN
-            RAISE e_no_income_exception;
-        END IF;
-        SYS.DBMS_OUTPUT.PUT_LINE('the amount is '||income);        
-        RETURN income;
-        EXCEPTION
-    WHEN e_no_income_exception THEN
-        SYS.DBMS_OUTPUT.PUT_LINE('Cannot incomes in '||month_tmp||'/'||year_tmp);
-    WHEN OTHERS THEN
-        SYS.DBMS_OUTPUT.PUT_LINE('Encountered the following error');
-        SYS.DBMS_OUTPUT.PUT_LINE(SQLERRM);
-    END incomeAt;
-
     ---payment membership renew
     PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2, is_student BOOLEAN)
     IS
@@ -111,7 +42,6 @@ IS
                 FETCH c_activate INTO activatedate;
                 IF c_activate%NOTFOUND THEN
                      DBMS_OUTPUT.PUT_LINE('New USER, No discount');
-
                 ELSE
                     --check if there is an exsiting membership which hasn't been activated
                     DBMS_OUTPUT.PUT_LINE('OLD activatedate'||activatedate);   
