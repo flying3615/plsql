@@ -1,9 +1,42 @@
+/*
+
+Incomes package.  
+This package includes two precedures,which are used for membership and booking information related functions.
+
+1.PROCEDURE buy_membership, 
+help members to renew theire membership purchase
+it will check member's overall attendance by [all attend/all membership period],
+it the attendance exceed specific threshold, the member will enjoy discount, and insert a new record
+but leaves empty for the activiate date field.
+Once members visit the gym, the trgger will automatically activate membership on the day they visit.
+*Fee:
+Student $15/week
+Adult $20/week
+
+
+2.procedure booking_facilities_available, 
+this procedure is used to help admin to check if a request of booking of facilies is available.
+make sure there is no engagement by checking memberbooking table.
+*/
+
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PACKAGE emp_admin_member
 IS
-
+    /**
+     * @param usernameIn member.musername%TYPE
+     * @param weeks Number
+     * @param pay_type VARCHAR2
+     * @param is_student BOOLEAN
+     */
     PROCEDURE buy_membership(usernameIn IN member.musername%TYPE, weeks IN NUMBER, pay_type IN VARCHAR2, is_student BOOLEAN);
 
+
+    /**
+     * @param facility_name facilities.fname%TYPE
+     * @param bookTime VARCHAR2
+     * @param duration(minutes) NUMBER
+     * @param usernameIn member.musername%TYPE
+     */
     PROCEDURE booking_facilities_available(facility_name IN facilities.fname%TYPE, bookTime IN VARCHAR2, duration IN NUMBER, usernameIn IN member.musername%TYPE);
 
 END;
@@ -73,6 +106,7 @@ IS
                 FETCH c_activate INTO activatedate;
                 IF c_activate%NOTFOUND THEN
                      DBMS_OUTPUT.PUT_LINE('New USER, No discount');
+                     discount := 1;                                      
                 ELSE
                     --check if there is an exsiting membership which hasn't been activated
                     IF activatedate IS NULL THEN
@@ -107,7 +141,9 @@ IS
                         discount := 0.6;                    
                     ELSIF attendence_rate >= 90 THEN
                         DBMS_OUTPUT.PUT_LINE('attendence_rate greater than 90%, 50% discount...');
-                        discount := 0.5;                    
+                        discount := 0.5;   
+                    ELSE 
+                        discount := 1;                 
                     END IF;               
                 END IF;
 

@@ -1,6 +1,36 @@
+/*
+
+Incomes package.  
+This package includes one function and one precedure,which are used for income statistic purpose.
+
+1.function incomeAt, 
+takes year and month two param to get the total incomes in that specific month of the year.
+You can skip any param so that function will automatically replace the missing param by current year or month.
+
+customized EXCEPTION e_no_income_exception
+
+output:
+Find incomes in 4/2017
+the amount is 115
+
+2.procedure incomeReportThisYear, 
+no param needed, to calcualte in current year, what's the incomes of each month.
+output:
+<==============Income in JUNE     ================>
+Find incomes in 6/2017
+the amount is 140
+$140
+*/
+
+
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PACKAGE emp_admin_incomes
 IS
+    /**
+     * @param year_in Number
+     * @param month_in Number
+     * @return Number
+     */
     FUNCTION incomeAt(
             year_in IN NUMBER,
             month_in IN NUMBER) RETURN NUMBER;
@@ -13,7 +43,7 @@ END;
 
 CREATE OR REPLACE PACKAGE BODY emp_admin_incomes
 IS
-    -----INCOME IN THE GIVEN MONTH
+     
     FUNCTION incomeAt(
             year_in IN NUMBER,
             month_in IN NUMBER) RETURN NUMBER
